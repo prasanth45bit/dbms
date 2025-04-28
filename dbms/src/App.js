@@ -57,7 +57,6 @@ if __name__ == '__main__':
 
   return (
     <div style={{ backgroundColor: "black", height: "100vh", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <h1>Content Copied!</h1>
     </div>
   );
 }
