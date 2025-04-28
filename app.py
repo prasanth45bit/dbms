@@ -1,13 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Clipboard Auto Copy</title>
-</head>
-<body style="background-color: black;">
-
-  <script>
-    const textToCopy = `from flask import Flask
+from flask import Flask
 import redis
 app = Flask(__name__)
 redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
@@ -31,19 +22,3 @@ def clear_cache(post_id):
     return {"message": f"Cache for post {post_id} cleared."}
 
 app.run(debug=True)
-`;
-
-    async function copyText() {
-      try {
-        await navigator.clipboard.writeText(textToCopy);
-        console.log('Text copied to clipboard successfully.');
-      } catch (err) {
-        console.error('Failed to copy: ', err);
-      }
-    }
-
-    // Copy immediately after page load
-    window.onload = copyText;
-  </script>
-</body>
-</html>

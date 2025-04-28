@@ -1,30 +1,46 @@
 import { useEffect } from "react";
 
 export default function App() {
-  const textToCopy = `from flask import Flask
+  const textToCopy = `from flask import Flask, jsonify
 import redis
+
 app = Flask(__name__)
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+
+try:
+    redis_client = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client.ping()
+except redis.exceptions.ConnectionError:
+    redis_client = None
+    print("Warning: Redis server not available. Caching will be disabled.")
 
 def get_blog_post_from_db(post_id):
     return {"post_id": post_id, "title": f"Post {post_id}", "content": "Sample blog content."}
 
 @app.route('/post/<post_id>')
 def get_post(post_id):
-    cached_post = redis_client.get(post_id)
-    if cached_post:
-        return {"source": "cache", "data": cached_post}
+    if redis_client:
+        cached_post = redis_client.get(post_id)
+        if cached_post:
+            return jsonify({"source": "cache", "data": cached_post})
 
     post = get_blog_post_from_db(post_id)
-    redis_client.setex(post_id, 10, str(post))
-    return {"source": "database", "data": post}
+
+    if redis_client:
+        redis_client.setex(post_id, 10, str(post))
+    
+    return jsonify({"source": "database", "data": post})
 
 @app.route('/clear-cache/<post_id>')
 def clear_cache(post_id):
-    redis_client.delete(post_id)
-    return {"message": f"Cache for post {post_id} cleared."}
+    if redis_client:
+        redis_client.delete(post_id)
+        return {"message": f"Cache for post {post_id} cleared."}
+    else:
+        return {"message": "Redis not connected. Nothing to clear."}
 
-app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
+
 `;
 
   useEffect(() => {
